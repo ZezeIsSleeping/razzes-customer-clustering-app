@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Update Data Pelanggan - Customer Segmentation{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-6">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-800">Update Data Pelanggan</h1>
+        <p class="text-xs text-gray-400 mt-1">Ubah data pelanggan yang ada dan jalankan clustering ulang agar hasil cluster sesuai dengan data terbaru.</p>
+    </div>
+
+    <form method="POST" action="/update/{{ data.id }}" class="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm space-y-6">
+        <!-- Readonly ID Field -->
+        <div class="space-y-2">
+            <label class="text-xs font-semibold text-gray-600">ID Pelanggan</label>
+            <input type="text" value="#{{ data.id }}" disabled class="w-full bg-gray-100 border border-gray-200 text-xs rounded-xl px-4 py-3 text-gray-500 font-medium">
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Gender -->
+            <div class="space-y-2">
+                <label class="text-xs font-semibold text-gray-600">Gender</label>
+                <select name="gender" required class="w-full bg-gray-50 border border-gray-200 text-xs rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="Male" {% if data.gender == 'Male' %}selected{% endif %}>Male</option>
+                    <option value="Female" {% if data.gender == 'Female' %}selected{% endif %}>Female</option>
+                </select>
+            </div>
+
+            <!-- Age -->
+            <div class="space-y-2">
+                <label class="text-xs font-semibold text-gray-600">Age (Usia)</label>
+                <input type="number" name="age" value="{{ data.age }}" required class="w-full bg-gray-50 border border-gray-200 text-xs rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <!-- Annual Income -->
+            <div class="space-y-2">
+                <label class="text-xs font-semibold text-gray-600">Annual Income (k$)</label>
+                <input type="number" name="annual_income" value="{{ data.annual_income }}" required class="w-full bg-gray-50 border border-gray-200 text-xs rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <!-- Spending Score -->
+            <div class="space-y-2">
+                <label class="text-xs font-semibold text-gray-600">Spending Score (1-100)</label>
+                <input type="number" name="spending_score" value="{{ data.spending_score }}" min="1" max="100" required class="w-full bg-gray-50 border border-gray-200 text-xs rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+        </div>
+
+        <!-- Info Notice -->
+        <div class="flex items-center gap-2 text-xs text-blue-500 bg-blue-50/50 p-3 rounded-xl">
+            <i class="fa-solid fa-circle-info"></i>
+            <span>Setelah data diperbarui, proses clustering akan dijalankan ulang secara otomatis sehingga hasil cluster selalu diperbarui sesuai data terbaru.</span>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex justify-end gap-3 pt-2">
+            <a href="/history" class="bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-medium px-5 py-3 rounded-xl transition">
+                Batal
+            </a>
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-6 py-3 rounded-xl shadow-sm transition">
+                Update & Clustering Ulang
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
