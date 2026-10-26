@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Bulk Upload Pelanggan{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-6">
+    <!-- Header -->
+    <div>
+        <h1 class="text-2xl font-bold text-gray-800">Bulk Upload Data Pelanggan</h1>
+        <p class="text-gray-500 text-sm mt-1">Unggah file CSV berisi banyak data pelanggan sekaligus untuk memproses segmentasi secara otomatis.</p>
+    </div>
+
+    <!-- Upload Card -->
+    <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100 space-y-6">
+        
+        <!-- Format CSV Preview Box -->
+        <div class="p-4 bg-gray-50 border border-gray-200 rounded-xl space-y-2">
+            <h4 class="text-xs font-bold text-gray-700 uppercase tracking-wider">Format Kolom CSV yang Diterima:</h4>
+            <div class="bg-white p-3 rounded-lg border border-gray-200 font-mono text-xs text-gray-600 overflow-x-auto">
+                Gender,Age,Annual Income (k$),Spending Score (1-100)<br>
+                Male,19,15,39<br>
+                Female,21,15,81
+            </div>
+            <p class="text-[11px] text-gray-500">*Sistem secara otomatis menyesuaikan nama kolom standar Mall Customer Segmentation Dataset.</p>
+        </div>
+
+        <!-- Upload Form -->
+        <form action="/bulk-upload" method="POST" enctype="multipart/form-data" class="space-y-6">
+            <div class="space-y-2">
+                <label class="block text-xs font-semibold text-gray-600">Pilih File CSV</label>
+                <div class="flex items-center justify-center w-full">
+                    <label for="file" class="flex flex-col items-center justify-center w-full h-44 border-2 border-gray-300 border-dashed rounded-2xl cursor-pointer bg-gray-50 hover:bg-gray-100/80 transition">
+                        <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                            <svg class="w-10 h-10 mb-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                            </svg>
+                            <p class="mb-1 text-sm font-semibold text-gray-700"><span class="text-blue-600">Klik untuk memilih file</span> atau seret file ke sini</p>
+                            <p class="text-xs text-gray-500">Hanya menerima format file .CSV</p>
+                            <span id="fileNameDisplay" class="mt-2 text-xs font-bold text-blue-600"></span>
+                        </div>
+                        <input id="file" name="file" type="file" accept=".csv" required class="hidden" onchange="showFileName(this)" />
+                    </label>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center justify-end space-x-3 border-t border-gray-100 pt-6">
+                <a href="/history" class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold rounded-xl transition">
+                    Batal
+                </a>
+                <button type="submit" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition shadow-sm shadow-blue-200 inline-flex items-center">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                    </svg>
+                    Proses Bulk Segmentasi
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function showFileName(input) {
+    const display = document.getElementById('fileNameDisplay');
+    if (input.files && input.files[0]) {
+        display.textContent = "File terpilih: " + input.files[0].name;
+    } else {
+        display.textContent = "";
+    }
+}
+</script>
+{% endblock %}

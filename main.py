@@ -1,6 +1,9 @@
 import os
 import joblib
 import json
+import io
+import pandas as pd
+from fastapi import File, UploadFile
 import numpy as np
 from fastapi import FastAPI, Request, Depends, Form, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -186,4 +189,72 @@ def delete_segment(id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Data tidak ditemukan")
     db.delete(data)
     db.commit()
+    return RedirectResponse(url="/history", status_code=303)
+
+# 7. Halaman Form Bulk Upload CSV
+@app.get("/bulk-upload", response_class=HTMLResponse)
+def get_bulk_upload_page(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="bulk_upload.html"
+    )
+
+# Process Bulk Upload CSV
+@app.post("/bulk-upload")
+async def process_bulk_upload(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db)
+):
+    if not file.filename.endswith('.csv'):
+        raise HTTPException(status_code=400, detail="File yang diunggah harus berformat .csv")
+    
+    contents = await file.read()
+    try:
+        df = pd.read_csv(io.BytesIO(contents))
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Gagal membaca file CSV: {str(e)}")
+    
+    # Standarisasi nama kolom agar fleksibel
+    df.columns = df.columns.str.strip()
+    
+    col_map = {
+        'Genre': 'gender',
+        'Gender': 'gender',
+        'Age': 'age',
+        'Annual Income (k$)': 'annual_income',
+        'Annual Income': 'annual_income',
+        'Spending Score (1-100)': 'spending_score',
+        'Spending Score': 'spending_score'
+    }
+    df = df.rename(columns=col_map)
+    
+    required_cols = ['gender', 'age', 'annual_income', 'spending_score']
+    for col in required_cols:
+        if col not in df.columns:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Kolom '{col}' tidak ditemukan. Format kolom CSV yang valid: Gender, Age, Annual Income (k$), Spending Score (1-100)"
+            )
+    
+    new_customers = []
+    for _, row in df.iterrows():
+        age = int(row['age'])
+        annual_income = int(row['annual_income'])
+        spending_score = int(row['spending_score'])
+        gender = str(row['gender']).strip().capitalize()
+        
+        cluster_label = predict_cluster(age, annual_income, spending_score) if kmeans_model else 0
+        
+        customer = CustomerSegment(
+            gender=gender,
+            age=age,
+            annual_income=annual_income,
+            spending_score=spending_score,
+            cluster_label=cluster_label
+        )
+        new_customers.append(customer)
+        
+    db.add_all(new_customers)
+    db.commit()
+    
     return RedirectResponse(url="/history", status_code=303)
