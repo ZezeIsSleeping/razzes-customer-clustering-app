@@ -1,5 +1,6 @@
 import os
 import joblib
+import json
 import numpy as np
 from fastapi import FastAPI, Request, Depends, Form, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -106,11 +107,32 @@ def get_result(id: int, request: Request, db: Session = Depends(get_db)):
 # 4. Riwayat Segmentasi
 @app.get("/history", response_class=HTMLResponse)
 def get_history(request: Request, db: Session = Depends(get_db)):
-    history_data = db.query(CustomerSegment).all()
+    history_data = db.query(CustomerSegment).order_by(CustomerSegment.id.desc()).all()
+    clusters = db.query(ClusterDefinition).all()
+    cluster_map = {c.cluster_label: c.cluster_name for c in clusters}
+    
+    # Format list untuk kebutuhan Chart.js
+    history_list = [
+        {
+            "id": item.id,
+            "gender": item.gender,
+            "age": item.age,
+            "annual_income": item.annual_income,
+            "spending_score": item.spending_score,
+            "cluster_label": item.cluster_label,
+            "cluster_name": cluster_map.get(item.cluster_label, f"Cluster {item.cluster_label}")
+        }
+        for item in history_data
+    ]
+    
     return templates.TemplateResponse(
         request=request,
         name="history.html",
-        context={"history": history_data}
+        context={
+            "history": history_data,
+            "cluster_map": cluster_map,
+            "history_json": json.dumps(history_list)
+        }
     )
 
 # 5. Form & Proses Update
@@ -119,10 +141,19 @@ def get_update_form(id: int, request: Request, db: Session = Depends(get_db)):
     data = db.query(CustomerSegment).filter(CustomerSegment.id == id).first()
     if not data:
         raise HTTPException(status_code=404, detail="Data tidak ditemukan")
+    
+    clusters = db.query(ClusterDefinition).all()
+    cluster_map = {c.cluster_label: c.cluster_name for c in clusters}
+    cluster_info = db.query(ClusterDefinition).filter(ClusterDefinition.cluster_label == data.cluster_label).first()
+    
     return templates.TemplateResponse(
         request=request,
         name="update_form.html",
-        context={"data": data}
+        context={
+            "data": data,
+            "cluster_map": cluster_map,
+            "cluster_info": cluster_info
+        }
     )
 
 @app.post("/update/{id}")

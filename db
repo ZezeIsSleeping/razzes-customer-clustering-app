@@ -1,0 +1,17 @@
+CREATE TABLE cluster_definitions (
+    cluster_label INTEGER PRIMARY KEY,
+    cluster_name VARCHAR(100) NOT NULL,
+    description TEXT NOT NULL
+);
+
+CREATE TABLE customer_segments (
+    id SERIAL PRIMARY KEY,
+    gender VARCHAR(10) NOT NULL,
+    age INTEGER NOT NULL,
+    annual_income INTEGER NOT NULL,
+    spending_score INTEGER NOT NULL,
+    cluster_label INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_cluster FOREIGN KEY (cluster_label) REFERENCES cluster_definitions(cluster_label)
+);
