@@ -11,7 +11,7 @@ __pycache__/
 .env
 
 # Database local (jika ada file SQLite/DB local)
-*.db
+
 *.sqlite3
 
 # IDE / Editor

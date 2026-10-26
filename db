@@ -15,3 +15,12 @@ CREATE TABLE customer_segments (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_cluster FOREIGN KEY (cluster_label) REFERENCES cluster_definitions(cluster_label)
 );
+
+
+INSERT INTO cluster_definitions (cluster_label, cluster_name, description) VALUES
+(0, 'Sensible Customers', 'Pendapatan rendah, tingkat pengeluaran rendah.'),
+(1, 'Standard Customers', 'Pendapatan rata-rata, tingkat pengeluaran rata-rata.'),
+(2, 'Target / High Earners', 'Pendapatan tinggi, tingkat pengeluaran tinggi.'),
+(3, 'Careless Customers', 'Pendapatan rendah, namun tingkat pengeluaran tinggi.'),
+(4, 'Conservative Customers', 'Pendapatan tinggi, namun tingkat pengeluaran rendah.')
+ON CONFLICT (cluster_label) DO NOTHING;
